@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from midi_utils import load_midi, get_drum_track, get_bpm, notes_to_grid
+from phase1_prototype.midi_utils import load_midi, get_drum_track, get_bpm, notes_to_grid, merge_grids
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +37,8 @@ def extract_features(midi_path: str) -> BeatFeatures:
         elif note.pitch in [38, 40]:
             snare_notes.append(note)
             
-    kick_grid = notes_to_grid(kick_notes, bpm, 16)
-    snare_grid = notes_to_grid(snare_notes, bpm, 16)
+    kick_grid = merge_grids(notes_to_grid(kick_notes, bpm, 16))
+    snare_grid = merge_grids(notes_to_grid(snare_notes, bpm, 16))
     
     kick_positions = [note.start for note in kick_notes]
     snare_positions = [note.start for note in snare_notes]

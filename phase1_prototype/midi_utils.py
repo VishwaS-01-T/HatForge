@@ -70,9 +70,14 @@ def get_bpm(midi: pretty_midi.PrettyMIDI) -> float:
         
     return 120.0
 
-def notes_to_grid(notes: list, bpm: float, subdivisions: int = 16) -> list:
+def notes_to_grid(notes: list, bpm: float, subdivisions: int = 16) -> list[list[int]]:
     """
-    Convert a list of Notes to a binary grid.
+    Convert a list of Notes to a list of per-bar binary grids.
+    
+    Instead of folding all notes into a single bar via modulo, this function
+    returns one grid per bar so that multi-bar patterns are preserved.  When
+    only a single summary grid is needed (e.g. for genre detection), the
+    caller can merge the bars with ``merge_grids()``.
     
     Args:
         notes: List of pretty_midi.Note objects.
@@ -80,20 +85,55 @@ def notes_to_grid(notes: list, bpm: float, subdivisions: int = 16) -> list:
         subdivisions: Number of grid slots per bar (default 16).
         
     Returns:
-        A list of 0s and 1s of length `subdivisions`.
+        A list of grids (each a list of 0s and 1s of length ``subdivisions``).
+        If no notes are found, returns a single empty bar.
     """
+    if not notes:
+        return [[0] * subdivisions]
+
     beats_per_bar = 4
     seconds_per_beat = 60.0 / bpm
     seconds_per_bar = beats_per_bar * seconds_per_beat
     seconds_per_step = seconds_per_bar / subdivisions
     
-    grid = [0] * subdivisions
+    # Determine how many bars we need
+    max_time = max(n.start for n in notes)
+    num_bars = max(1, int(max_time / seconds_per_bar) + 1)
+    
+    grids = [[0] * subdivisions for _ in range(num_bars)]
+    
     for note in notes:
-        start_in_bar = note.start % seconds_per_bar
+        bar_index = int(note.start / seconds_per_bar)
+        if bar_index >= num_bars:
+            bar_index = num_bars - 1
+        start_in_bar = note.start - bar_index * seconds_per_bar
         step = int(round(start_in_bar / seconds_per_step)) % subdivisions
-        grid[step] = 1
+        grids[bar_index][step] = 1
         
-    return grid
+    return grids
+
+def merge_grids(grids: list[list[int]]) -> list[int]:
+    """OR-merge a list of per-bar grids into a single summary grid.
+    
+    This is the backward-compatible replacement for the old notes_to_grid()
+    behaviour that folded everything into one bar.
+    
+    Args:
+        grids: A list of per-bar grids (from notes_to_grid).
+        
+    Returns:
+        A single grid of 0s and 1s.
+    """
+    if not grids:
+        return [0] * 16
+    
+    subdivisions = len(grids[0])
+    merged = [0] * subdivisions
+    for grid in grids:
+        for i in range(subdivisions):
+            if grid[i] == 1:
+                merged[i] = 1
+    return merged
 
 def save_midi(notes: list, bpm: float, output_path: str) -> None:
     """
@@ -121,7 +161,9 @@ if __name__ == "__main__":
         pretty_midi.Note(velocity=100, pitch=42, start=sec_per_beat/2, end=0.1+sec_per_beat/2),
         pretty_midi.Note(velocity=100, pitch=42, start=sec_per_beat, end=0.1+sec_per_beat),
     ]
-    grid = notes_to_grid(notes, bpm)
+    grids = notes_to_grid(notes, bpm)
+    # All notes fit in bar 0
+    grid = merge_grids(grids)
     print("Grid:", grid)
     assert grid[0] == 1
     assert grid[2] == 1

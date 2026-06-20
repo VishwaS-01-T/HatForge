@@ -1,12 +1,12 @@
 import os
 import pretty_midi
-from analyze_beat import extract_features
-from generate_hats import generate_base_pattern, add_rolls, add_open_hats, apply_genre_pattern, grid_to_notes, HatConfig
-from humanizer import humanize_velocity, humanize_timing
-from midi_utils import save_midi
+from phase1_prototype.analyze_beat import extract_features
+from phase1_prototype.generate_hats import generate_base_pattern, add_rolls, add_open_hats, apply_genre_pattern, grid_to_notes, HatConfig
+from phase1_prototype.humanizer import humanize_velocity, humanize_timing
+from phase1_prototype.midi_utils import save_midi
 
 def test_full_chain():
-    midi_path = "test_beat.mid"
+    midi_path = os.path.join(os.path.dirname(__file__), "test_beat.mid")
     assert os.path.exists(midi_path), "test_beat.mid not found!"
     
     # 1. Extract features

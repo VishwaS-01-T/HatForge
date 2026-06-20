@@ -1,14 +1,26 @@
 import random
 import pretty_midi
 
-def humanize_velocity(notes: list[pretty_midi.Note], strength: float = 0.3) -> list[pretty_midi.Note]:
-    """Apply human feel to velocity."""
+def humanize_velocity(notes: list[pretty_midi.Note], strength: float = 0.3,
+                      velocity_base: int = 80) -> list[pretty_midi.Note]:
+    """Apply human feel to velocity.
+
+    Args:
+        notes: Input note list.
+        strength: Randomness strength (0.0–1.0).
+        velocity_base: Centre velocity value. Defaults to 80; when a preset
+                       supplies a custom value via HatConfig.velocity_base,
+                       pass it here so the preset is actually honoured.
+
+    Returns:
+        A new list of Note objects with humanized velocities.
+    """
     new_notes = []
-    base_velocity = 80
     
     for i, note in enumerate(notes):
-        velocity = base_velocity + random.gauss(0, strength * 30)
+        velocity = velocity_base + random.gauss(0, strength * 30)
         
+        # Accent every 4th note (downbeat feel)
         if i % 4 == 0:
             velocity *= 1.15
             
@@ -24,16 +36,49 @@ def humanize_velocity(notes: list[pretty_midi.Note], strength: float = 0.3) -> l
         
     return new_notes
 
-def humanize_timing(notes: list[pretty_midi.Note], bpm: float, strength: float = 0.2) -> list[pretty_midi.Note]:
-    """Apply random micro-timing shifts."""
-    new_notes = []
+def humanize_timing(notes: list[pretty_midi.Note], bpm: float,
+                    strength: float = 0.2) -> list[pretty_midi.Note]:
+    """Apply random micro-timing shifts.
+
+    Safeguards added:
+    - start is clamped to >= 0.
+    - end is guaranteed to be > start by at least ``min_duration``.
+    - Adjacent notes are checked: if a shift would push this note past
+      the next note's start, the shift is capped so they don't overlap.
+    """
+    if not notes:
+        return []
+
+    # Sort a copy by start time so we can reason about neighbours
+    sorted_notes = sorted(notes, key=lambda n: n.start)
+
     sixteenth_seconds = 60.0 / bpm / 4.0
+    min_duration = sixteenth_seconds * 0.25  # 1/64 note minimum length
+
+    new_notes = []
     
-    for note in notes:
+    for idx, note in enumerate(sorted_notes):
         offset = random.gauss(0, strength * (sixteenth_seconds * 0.1))
         
         start_time = max(0.0, note.start + offset)
-        end_time = max(0.0, note.end + offset)
+
+        # Prevent overlapping with the next note
+        if idx < len(sorted_notes) - 1:
+            next_start = sorted_notes[idx + 1].start
+            # Don't let this note's start go past the next note (minus a small gap)
+            start_time = min(start_time, next_start - min_duration)
+            start_time = max(0.0, start_time)
+
+        # Preserve the original duration, but guarantee minimum
+        original_duration = note.end - note.start
+        duration = max(min_duration, original_duration)
+        end_time = start_time + duration
+
+        # If end would overlap the next note, shorten duration
+        if idx < len(sorted_notes) - 1:
+            next_start = sorted_notes[idx + 1].start
+            if end_time > next_start:
+                end_time = max(start_time + min_duration, next_start)
         
         new_note = pretty_midi.Note(
             velocity=note.velocity,
@@ -71,3 +116,6 @@ def add_ghost_notes(notes: list[pretty_midi.Note], probability: float = 0.1) -> 
     # Sort notes by start time after adding ghosts
     new_notes.sort(key=lambda n: n.start)
     return new_notes
+
+if __name__ == "__main__":
+    pass
