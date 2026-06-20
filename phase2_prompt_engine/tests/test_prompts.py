@@ -1,9 +1,7 @@
 import sys
 import os
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from prompt_parser import parse_prompt
+from phase2_prompt_engine.prompt_parser import parse_prompt
 
 def test_prompts():
     config1 = parse_prompt("dark rage")
