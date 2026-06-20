@@ -1,0 +1,16 @@
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+output/
+phase1_prototype/output/
+bridge/output/
+checkpoints/
+data/raw/
+data/processed/
+*.mid
+build/
+vendor/
+.DS_Store
+AGENT_PROGRESS.md
+agentcontext.md

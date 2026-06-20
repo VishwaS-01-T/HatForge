@@ -1,0 +1,100 @@
+{
+  "styles": {
+    "trap": {
+      "complexity": 0.45,
+      "roll_probability": 0.5,
+      "open_hat_probability": 0.12,
+      "subdivision": 32,
+      "swing_ratio": 0.0,
+      "velocity_base": 75,
+      "description": "Sparse closed hats with 1/32 rolls before snare"
+    },
+    "dark_rage": {
+      "complexity": 0.7,
+      "roll_probability": 0.65,
+      "open_hat_probability": 0.08,
+      "subdivision": 32,
+      "swing_ratio": 0.0,
+      "velocity_base": 90,
+      "description": "Aggressive, dense, frequent rolls, high velocity"
+    },
+    "drill": {
+      "complexity": 0.85,
+      "roll_probability": 0.2,
+      "open_hat_probability": 0.05,
+      "subdivision": 16,
+      "swing_ratio": 0.0,
+      "velocity_base": 85,
+      "description": "Dense 1/16 pattern, fast, aggressive accents"
+    },
+    "jersey_club": {
+      "complexity": 0.75,
+      "roll_probability": 0.4,
+      "open_hat_probability": 0.2,
+      "subdivision": 16,
+      "swing_ratio": 0.15,
+      "velocity_base": 80,
+      "description": "Bouncy, syncopated, open hats on off-beats"
+    },
+    "boom_bap": {
+      "complexity": 0.4,
+      "roll_probability": 0.1,
+      "open_hat_probability": 0.3,
+      "subdivision": 8,
+      "swing_ratio": 0.6,
+      "velocity_base": 70,
+      "description": "Swung 1/8 hats, classic boom bap feel"
+    },
+    "metro_bounce": {
+      "complexity": 0.55,
+      "roll_probability": 0.55,
+      "open_hat_probability": 0.18,
+      "subdivision": 32,
+      "swing_ratio": 0.05,
+      "velocity_base": 78,
+      "description": "Metro Boomin style. Space + rolls. Snare-reactive."
+    },
+    "spacey": {
+      "complexity": 0.25,
+      "roll_probability": 0.1,
+      "open_hat_probability": 0.4,
+      "subdivision": 8,
+      "swing_ratio": 0.2,
+      "velocity_base": 55,
+      "description": "Open, airy, lots of space, quiet"
+    },
+    "chaotic": {
+      "complexity": 0.95,
+      "roll_probability": 0.8,
+      "open_hat_probability": 0.3,
+      "subdivision": 32,
+      "swing_ratio": 0.0,
+      "velocity_base": 95,
+      "description": "Maximum density, frequent rolls, unpredictable"
+    },
+    "minimal": {
+      "complexity": 0.2,
+      "roll_probability": 0.05,
+      "open_hat_probability": 0.05,
+      "subdivision": 8,
+      "swing_ratio": 0.0,
+      "velocity_base": 60,
+      "description": "Very sparse, clean, out of the way"
+    }
+  },
+  "keywords": {
+    "dark": {"complexity": 0.1, "velocity_base": 10, "roll_probability": 0.1},
+    "fast": {"complexity": 0.2, "subdivision": 32},
+    "slow": {"complexity": -0.15, "subdivision": 8},
+    "heavy": {"velocity_base": 15, "complexity": 0.1},
+    "light": {"velocity_base": -15, "complexity": -0.1},
+    "more rolls": {"roll_probability": 0.2},
+    "less busy": {"complexity": -0.2},
+    "more busy": {"complexity": 0.2},
+    "add space": {"complexity": -0.15},
+    "bouncy": {"swing_ratio": 0.2},
+    "straight": {"swing_ratio": 0.0},
+    "aggressive": {"velocity_base": 20, "roll_probability": 0.15},
+    "chill": {"velocity_base": -10, "complexity": -0.1, "swing_ratio": 0.1}
+  }
+}
