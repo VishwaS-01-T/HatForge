@@ -43,7 +43,32 @@ HatForgeAudioProcessorEditor::HatForgeAudioProcessorEditor (HatForgeAudioProcess
     serverEditor.setText("127.0.0.1:7891");
 
     addAndMakeVisible(connectBtn);
+    connectBtn.onClick = [this]() {
+        juce::String hostPort = serverEditor.getText();
+        juce::String host = hostPort.upToFirstOccurrenceOf(":", false, false);
+        int port = hostPort.fromFirstOccurrenceOf(":", false, false).getIntValue();
+        if (port == 0) port = 7891;
+        
+        if (audioProcessor.aiBridge->connect(host, port)) {
+            statusLabel.setText("Status: Connected to " + hostPort, juce::dontSendNotification);
+        } else {
+            statusLabel.setText("Status: Connection failed", juce::dontSendNotification);
+        }
+    };
+
     addAndMakeVisible(testBtn);
+    testBtn.onClick = [this]() {
+        juce::var payload(new juce::DynamicObject());
+        auto* payloadObj = payload.getDynamicObject();
+        payloadObj->setProperty("prompt", "ping");
+        
+        juce::String response = audioProcessor.aiBridge->sendRequest(payload);
+        if (response.contains("\"error\"")) {
+             statusLabel.setText("Status: Ping failed", juce::dontSendNotification);
+        } else {
+             statusLabel.setText("Status: Ping successful", juce::dontSendNotification);
+        }
+    };
 }
 
 HatForgeAudioProcessorEditor::~HatForgeAudioProcessorEditor() {}
@@ -53,7 +78,7 @@ void HatForgeAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (juce::Colours::darkgrey);
     g.setColour (juce::Colours::white);
     g.setFont (15.0f);
-    g.drawText ("HatForge BPM: " + juce::String(audioProcessor.currentBPM), getLocalBounds().withTrimmedTop(10).withTrimmedRight(10), juce::Justification::topRight, true);
+    g.drawText ("HatForge BPM: " + juce::String(audioProcessor.playbackState.bpm.load()), getLocalBounds().withTrimmedTop(10).withTrimmedRight(10), juce::Justification::topRight, true);
 }
 
 void HatForgeAudioProcessorEditor::resized()

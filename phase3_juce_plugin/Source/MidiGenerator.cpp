@@ -6,18 +6,39 @@ juce::MidiBuffer MidiGenerator::generateOffline(float bpm, float complexity, flo
     double secondsPerBeat = 60.0 / bpm;
     double secondsPer16th = secondsPerBeat / 4.0;
     
-    int numSteps = 16;
+    // Euclidean rhythm parameters
+    int n = 16; // 16 steps per bar
+    int k = juce::jlimit(1, 16, (int)(complexity * 16.0f)); // Hits per bar
+    
     for (int bar = 0; bar < 4; ++bar) {
-        for (int i = 0; i < numSteps; ++i) {
-            bool play = false;
-            if (complexity >= 0.8f) play = true;
-            else if (complexity >= 0.4f && i % 2 == 0) play = true;
-            else if (i % 4 == 0) play = true;
+        for (int i = 0; i < n; ++i) {
+            // Euclidean rhythm condition: (step * hits) % steps < hits
+            bool isHit = ((i * k) % n) < k;
             
-            if (play) {
+            if (isHit) {
+                // Determine if we should add a roll (32nd note before the hit)
+                bool isRoll = (juce::Random::getSystemRandom().nextFloat() < rollProb) && (i % 4 != 0); // avoid rolls exactly on downbeats
+                
                 double time = (bar * 16 + i) * secondsPer16th;
                 int samplePos = (int)(time * 44100.0); 
-                juce::MidiMessage msgOn = juce::MidiMessage::noteOn(1, 42, 0.8f);
+                
+                if (isRoll) {
+                    double rollTime = time - (secondsPer16th * 0.5);
+                    if (rollTime > 0.0) {
+                        int rollSamplePos = (int)(rollTime * 44100.0);
+                        juce::MidiMessage msgOn = juce::MidiMessage::noteOn(1, 42, 0.6f);
+                        msgOn.setTimeStamp(rollTime);
+                        buffer.addEvent(msgOn, rollSamplePos);
+                        
+                        juce::MidiMessage msgOff = juce::MidiMessage::noteOff(1, 42);
+                        msgOff.setTimeStamp(rollTime + secondsPer16th * 0.25);
+                        buffer.addEvent(msgOff, rollSamplePos + (int)(secondsPer16th * 0.25 * 44100.0));
+                    }
+                }
+                
+                // Add the main hit with slight humanized velocity
+                float velocity = 0.8f + (juce::Random::getSystemRandom().nextFloat() * 0.2f - 0.1f);
+                juce::MidiMessage msgOn = juce::MidiMessage::noteOn(1, 42, velocity);
                 msgOn.setTimeStamp(time);
                 buffer.addEvent(msgOn, samplePos);
                 
