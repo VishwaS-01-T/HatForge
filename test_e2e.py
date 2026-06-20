@@ -8,15 +8,12 @@ import subprocess
 import time
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "phase1_prototype"))
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "phase2_prompt_engine"))
-
-from analyze_beat import extract_features
-from prompt_parser import parse_prompt
-from generate_hats import generate_base_pattern, add_rolls, apply_genre_pattern, grid_to_notes, HatConfig, add_open_hats
-from parameter_engine import apply_config_to_generator
-from humanizer import humanize_velocity, humanize_timing
-from midi_utils import save_midi
+from phase1_prototype.analyze_beat import extract_features
+from phase2_prompt_engine.prompt_parser import parse_prompt
+from phase1_prototype.generate_hats import generate_base_pattern, add_rolls, apply_genre_pattern, grid_to_notes, HatConfig, add_open_hats
+from phase2_prompt_engine.parameter_engine import apply_config_to_generator
+from phase1_prototype.humanizer import humanize_velocity, humanize_timing
+from phase1_prototype.midi_utils import save_midi
 
 def run_test_1():
     print("Test 1: Phase 1 standalone")
@@ -50,7 +47,7 @@ def run_test_2():
 def send_message(conn, data):
     json_str = json.dumps(data)
     json_bytes = json_str.encode('utf-8')
-    msglen = struct.pack('<I', len(json_bytes))
+    msglen = struct.pack('>I', len(json_bytes))
     conn.sendall(msglen + json_bytes)
 
 def recvall(conn, n):
@@ -66,7 +63,7 @@ def receive_message(conn):
     raw_msglen = recvall(conn, 4)
     if not raw_msglen:
         return None
-    msglen = struct.unpack('<I', raw_msglen)[0]
+    msglen = struct.unpack('>I', raw_msglen)[0]
     data = recvall(conn, msglen)
     if not data:
         return None

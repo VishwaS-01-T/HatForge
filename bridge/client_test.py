@@ -11,7 +11,7 @@ PORT = 7891
 def send_message(conn: socket.socket, data: dict) -> None:
     json_str = json.dumps(data)
     json_bytes = json_str.encode('utf-8')
-    msglen = struct.pack('<I', len(json_bytes))
+    msglen = struct.pack('>I', len(json_bytes))
     conn.sendall(msglen + json_bytes)
 
 def recvall(conn, n):
@@ -27,7 +27,7 @@ def receive_message(conn: socket.socket) -> dict:
     raw_msglen = recvall(conn, 4)
     if not raw_msglen:
         return None
-    msglen = struct.unpack('<I', raw_msglen)[0]
+    msglen = struct.unpack('>I', raw_msglen)[0]
     data = recvall(conn, msglen)
     if not data:
         return None

@@ -8,13 +8,10 @@ from pathlib import Path
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "phase1_prototype"))
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "phase2_prompt_engine"))
-
-from analyze_beat import extract_features
-from prompt_parser import parse_prompt
-from parameter_engine import apply_config_to_generator
-from midi_utils import save_midi
+from phase1_prototype.analyze_beat import extract_features
+from phase2_prompt_engine.prompt_parser import parse_prompt
+from phase2_prompt_engine.parameter_engine import apply_config_to_generator
+from phase1_prototype.midi_utils import save_midi
 
 HOST = "127.0.0.1"
 PORT = 7891
@@ -36,7 +33,7 @@ def receive_message(conn: socket.socket) -> dict:
     raw_msglen = recvall(conn, 4)
     if not raw_msglen:
         return None
-    msglen = struct.unpack('<I', raw_msglen)[0]
+    msglen = struct.unpack('>I', raw_msglen)[0]
     data = recvall(conn, msglen)
     if not data:
         return None
@@ -46,7 +43,7 @@ def send_message(conn: socket.socket, data: dict) -> None:
     """Send 4-byte length header then JSON body."""
     json_str = json.dumps(data)
     json_bytes = json_str.encode('utf-8')
-    msglen = struct.pack('<I', len(json_bytes))
+    msglen = struct.pack('>I', len(json_bytes))
     conn.sendall(msglen + json_bytes)
 
 def handle_client(conn: socket.socket, addr: tuple) -> None:
