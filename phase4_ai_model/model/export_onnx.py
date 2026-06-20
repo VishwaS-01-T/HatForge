@@ -1,6 +1,6 @@
 import torch
 import os
-from transformer import HatForgeTransformer
+from phase4_ai_model.model.transformer import HatForgeTransformer
 import onnxruntime as ort
 
 def export_to_onnx(checkpoint_path: str, output_path: str) -> None:

@@ -2,8 +2,7 @@ import pretty_midi
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "phase1_prototype"))
-from analyze_beat import BeatFeatures
+from phase1_prototype.analyze_beat import BeatFeatures
 
 VOCAB = {
     "PAD": 0,
@@ -18,21 +17,21 @@ VOCAB = {
     "PEDAL_HAT": 9,    
 }
 
-# Time tokens
-for i in range(16):
+# Time tokens for 4 bars (64 steps of 16ths)
+for i in range(64):
     VOCAB[f"STEP_{i}"] = 10 + i
 
 # Velocity tokens
 for i in range(1, 9):
-    VOCAB[f"VEL_{i}"] = 25 + i
+    VOCAB[f"VEL_{i}"] = 74 + i
 
-VOCAB["STYLE_TRAP"] = 34
-VOCAB["STYLE_DRILL"] = 35
-VOCAB["STYLE_BOOMBAP"] = 36
-VOCAB["STYLE_JERSEY"] = 37
-VOCAB["STYLE_UNKNOWN"] = 38
+VOCAB["STYLE_TRAP"] = 83
+VOCAB["STYLE_DRILL"] = 84
+VOCAB["STYLE_BOOMBAP"] = 85
+VOCAB["STYLE_JERSEY"] = 86
+VOCAB["STYLE_UNKNOWN"] = 87
 
-VOCAB_SIZE = 39
+VOCAB_SIZE = 88
 
 PITCH_TO_TOKEN = {
     36: "KICK", 35: "KICK2",
@@ -81,12 +80,9 @@ def midi_to_tokens(midi_path: str, style: str = "unknown") -> list[int]:
         if note.pitch not in PITCH_TO_TOKEN:
             continue
             
-        bar_num = int(note.start / seconds_per_bar)
-        start_in_bar = note.start % seconds_per_bar
-        step = int(round(start_in_bar / seconds_per_16th)) % 16
+        step = int(round(note.start / seconds_per_16th))
         
-        # We only consider first bar for simplicity in this dataset
-        if bar_num > 0:
+        if step >= 64:
             continue
             
         pitch_tok = PITCH_TO_TOKEN[note.pitch]
@@ -151,10 +147,24 @@ def encode_beat_context(features: BeatFeatures) -> list[int]:
     style_tok = VOCAB.get(f"STYLE_{features.estimated_genre.upper()}", VOCAB["STYLE_UNKNOWN"])
     tokens.append(style_tok)
     
-    for i in range(16):
-        if features.kick_grid[i] == 1:
-            tokens.extend([VOCAB[f"STEP_{i}"], VOCAB["KICK"], VOCAB["VEL_6"]])
-        if features.snare_grid[i] == 1:
-            tokens.extend([VOCAB[f"STEP_{i}"], VOCAB["SNARE"], VOCAB["VEL_6"]])
+    bpm = features.bpm
+    seconds_per_beat = 60.0 / bpm
+    seconds_per_bar = 4 * seconds_per_beat
+    seconds_per_16th = seconds_per_bar / 16.0
+    
+    events = []
+    for pos in features.kick_positions:
+        step = int(round(pos / seconds_per_16th))
+        if step < 64:
+            events.append((step, "KICK"))
             
+    for pos in features.snare_positions:
+        step = int(round(pos / seconds_per_16th))
+        if step < 64:
+            events.append((step, "SNARE"))
+            
+    events.sort()
+    for step, inst in events:
+        tokens.extend([VOCAB[f"STEP_{step}"], VOCAB[inst], VOCAB["VEL_6"]])
+        
     return tokens

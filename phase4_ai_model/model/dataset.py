@@ -5,9 +5,8 @@ import torch
 from torch.utils.data import Dataset
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "phase1_prototype"))
-from analyze_beat import extract_features
-from tokenizer import midi_to_tokens, encode_beat_context, VOCAB
+from phase1_prototype.analyze_beat import extract_features
+from phase4_ai_model.model.tokenizer import midi_to_tokens, encode_beat_context, VOCAB
 
 class DrumDataset(Dataset):
     def __init__(self, data_list, max_seq_len: int = 256):

@@ -3,12 +3,9 @@ import random
 import pretty_midi
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "phase1_prototype"))
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "phase2_prompt_engine"))
-
-from analyze_beat import BeatFeatures
-from generate_hats import HatConfig, generate_base_pattern, add_rolls, add_open_hats, grid_to_notes
-from midi_utils import save_midi
+from phase1_prototype.analyze_beat import BeatFeatures
+from phase1_prototype.generate_hats import HatConfig, generate_base_pattern, add_rolls, add_open_hats, grid_to_notes
+from phase1_prototype.midi_utils import save_midi
 
 def generate_synthetic_data(num_samples: int, output_dir: str):
     os.makedirs(output_dir, exist_ok=True)
