@@ -1,6 +1,7 @@
 import pretty_midi
 import sys
 import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from phase1_prototype.analyze_beat import BeatFeatures
 

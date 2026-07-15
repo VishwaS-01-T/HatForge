@@ -14,3 +14,10 @@ vendor/
 .DS_Store
 AGENT_PROGRESS.md
 agentcontext.md
+groove-v1.0.0-midionly/
+*.zip
+phase4_ai_model/data/raw/
+phase4_ai_model/data/processed/
+phase4_ai_model/data/groove-v1.0.0-midionly/
+*.onnx
+*.pt

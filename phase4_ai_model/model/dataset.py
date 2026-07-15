@@ -4,7 +4,7 @@ import random
 import torch
 from torch.utils.data import Dataset
 import sys
-
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from phase1_prototype.analyze_beat import extract_features
 from phase4_ai_model.model.tokenizer import midi_to_tokens, encode_beat_context, VOCAB
 
